@@ -1,0 +1,5 @@
+graph,defense_target,R_original_under_target,R_optimized_under_target,delta,relative_improve,T_max,T_min,N_per_iter,alpha,max_iter,traj_dir,traj_only_if_improved,traj_save_every
+graph_0,HDA,0.2741176470588235,0.39529411764705885,0.12117647058823533,0.44206008583691003,0.09,1e-10,10,0.99,2070,results\final_graphs\graph_0\Trajectory_HDA,True,1
+graph_0,CI,0.3023529411764706,0.41411764705882353,0.11176470588235293,0.3696498054474708,0.09,1e-10,10,0.99,2070,results\final_graphs\graph_0\Trajectory_CI,True,1
+graph_0,CoreHD,0.2909803921568625,0.37411764705882333,0.08313725490196083,0.28571428571428614,0.09,1e-10,10,0.99,2070,results\final_graphs\graph_0\Trajectory_CoreHD,True,1
+graph_0,EI,0.2615686274509804,0.4615686274509804,0.19999999999999996,0.7646176911544226,0.09,1e-10,10,0.99,2070,results\final_graphs\graph_0\Trajectory_EI,True,1
