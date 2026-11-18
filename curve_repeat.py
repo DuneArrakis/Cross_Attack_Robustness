@@ -54,7 +54,7 @@ import CI, HDA, EI, CoreHD
 
 GRAPH_DIR   = "generate"      # Directory containing original graphs
 #GRAPH_DIR   = "generate_real"
-OUT_DIR     = "results"       # Output directory
+OUT_DIR     = "results/legacy_demo"       # Output directory
 #OUT_DIR     = "results_real"
 PTS_RS      = 101             # Number of resampled curve points over [0, 1]
 POOL_RATIO  = 0.3             # Use CPU_count * POOL_RATIO worker processes

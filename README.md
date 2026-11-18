@@ -1,228 +1,55 @@
-# Cross Attack Robustness
+# Cross-attack robustness of degree-preserving network designs
 
-This repository contains the experimental code for evaluating cross-attack
-robustness of complex networks. The workflow generates or loads networks,
-optimizes network topology against several attack methods, compares robustness
-curves, produces an onion-structure rewiring baseline, and computes topology
-diagnostics for the resulting graphs.
+The revised study evaluates the original network and seven optimized designs under seven node-removal protocols. The [BA500 robustness matrix](results/R_mean.csv) contains the 56 cell means in Fig. 4(a), including FINDER. Each cell averages 50 independent input networks. HDA and DomiRank give seven-attack design means of 0.280439 and 0.290205 on BA500.
 
-## Repository Structure
+## Reproduce the paper
 
-```text
-.
-|-- generate.py                 # Generate synthetic ER/BA/WS networks
-|-- curve_repeat.py             # Main cross-attack robustness experiment
-|-- onion_rewire.py             # Degree-preserving onion-style rewiring baseline
-|-- topo_index_statistic.py     # Topology diagnostics and plots
-|-- HDA.py                      # High-degree adaptive attack baseline
-|-- CI.py                       # Collective Influence attack
-|-- CoreHD.py                   # CoreHD attack
-|-- EI.py                       # Explosive Immunization attack
-|-- finder_wrapper.py           # Wrapper around FINDER_ND
-|-- FINDER_ND/                  # FINDER model, Cython extensions, and wrapper code
-|-- real_data/                  # Example real-world edge-list networks
-|-- requirements.txt            # Python package dependencies
-`-- results/                    # Generated outputs, created by the scripts
-```
-
-## Environment
-
-The dependencies can be installed with:
+From the repository root, use Linux x86-64 Docker. The image pins Python 3.7.12 and the CPU dependencies, compiles the FINDER extensions, and includes the trained checkpoint and data. Mount a directory to keep the generated results.
 
 ```bash
-pip install -r requirements.txt
+docker build --platform linux/amd64 -t cross-attack-paper .
+mkdir -p work
+docker run --platform linux/amd64 --rm --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp -v "$PWD/work:/work/work" cross-attack-paper \
+  python reproduce.py --replay-orders
 ```
 
-The bundled FINDER extensions are precompiled for Python 3.7 on Windows
-(`*.cp37-win_amd64.pyd`). For the easiest reproduction, use a Python 3.7
-environment matching the exported dependencies. If using another Python version
-or operating system, rebuild the Cython extensions in `FINDER_ND/` before
-running the FINDER-based experiments.
+The command checks the archive hashes and computes robustness from all 16,912 full-resolution curves. On the synthetic networks it also reconstructs the curves from saved graphs and removal orders. Omit `--replay-orders` for the faster curve-based check. Both commands regenerate the following outputs.
 
-The FINDER wrapper expects the checkpoint files under:
+| Manuscript | Output under `work/` | Source |
+| --- | --- | --- |
+| Fig. 3 | `figures/curves.pdf` | BA500 curves averaged on a common removal grid |
+| Fig. 4 | `figures/matrix.pdf`, `BA_N500/R_mean.csv`, `BA_N500/defense_ranking.csv` | Raw curves, one design mean per input, paired input resampling |
+| Fig. 5 and Appendix B | `figures/topology.pdf`, `figures/topology_uncertainty.pdf` | Rewired and original BA500 edge lists |
+| Figs. 6–8 | `figures/feedback.pdf`, `figures/exchange.pdf`, `figures/onion.pdf` | Measured trajectories and candidate statistics, the selected BA30 exchange, and paired construction scores |
+| Table 2 | `figures/design_rows.tex` | Within-network seven-attack means, followed by the across-network mean and sample SD |
+| Appendix A | `figures/original_rows.tex`, `figures/timing_rows.tex` | Original-network scores and measured CPU time for initial and candidate evaluations |
 
-```text
-FINDER_ND/models/nrange_30_50_iter_78000.ckpt.*
-```
+The script compares all Fig. 4 cells, design means and bootstrap endpoints with the published numerical records. It also checks the three LaTeX tables against the rows used in the manuscript. The input network is the resampling unit for the 10,000 bootstrap draws (seed 20261014). For a graph with `N` nodes, each archived curve gives `LCC(q)/N` in the column named `R`. The scalar robustness is the sum of that column over `q = 1, …, N` divided by `N`.
 
-## Input Graph Format
+## Repeat the optimization
 
-All main scripts expect undirected edge-list files. Each line should contain at
-least two node ids:
-
-```text
-u v
-```
-
-or the repository's default format:
-
-```text
-u v {}
-```
-
-Files used by the main workflow should be named `graph_*.txt` and placed in the
-`generate/` directory. Node ids should be integers. Isolated nodes cannot be
-recovered from an edge-only file unless they are represented elsewhere.
-
-## Workflow
-
-### 1. Prepare Networks
-
-Generate synthetic networks:
+For a short end-to-end check, the command below repeats the complete HDA annealing schedule on BA100 input `graph_0` and runs all seven evaluations on both the original and rewired graph. It compares the resulting graph checksum and 14 robustness scores with the archive.
 
 ```bash
-python generate.py
+docker run --platform linux/amd64 --rm --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp -v "$PWD/work:/work/work" cross-attack-paper \
+  python reproduce.py --check-example
 ```
 
-Edit the configuration at the top of `generate.py` to choose the number of
-graphs, graph size, random seed, and network model:
-
-- `GRAPH_TYPE = "ER"` for Erdos-Renyi networks
-- `GRAPH_TYPE = "BA"` for Barabasi-Albert networks
-- `GRAPH_TYPE = "WS"` for Watts-Strogatz networks
-
-Alternatively, use real-world networks by copying files from `real_data/` into
-`generate/` and naming them as `graph_*.txt`, for example:
+For a full synthetic setting, extract the paper inputs and run its configuration in the same mounted directory. For example, the following repeats all 50 BA500 networks with the original search budgets.
 
 ```bash
-mkdir -p generate
-cp real_data/graph_USAir97_0.txt generate/graph_USAir97_0.txt
+docker run --platform linux/amd64 --rm --user "$(id -u):$(id -g)" \
+  -e HOME=/tmp -v "$PWD/work:/work/work" cross-attack-paper sh -c \
+  'python reproduce.py --extract-inputs BA_N500 && python -m run pipeline --config reproduction/configs/BA_N500.json'
 ```
 
-Important: `generate.py` clears existing `generate/*.txt` files before writing
-new synthetic graphs. Do not run it after copying real-world data unless you
-intend to overwrite the current inputs.
+Each [synthetic configuration](reproduction/configs) records its graph-generation seed, optimization and evaluation seed bases, annealing schedule and method options. Each archive contains the actual task seeds. The machine-readable [settings table](reproduction/settings.json) lists all eight settings. CPU hours in Appendix A were measured on the original runs and will depend on the host during a rerun.
 
-### 2. Run Cross-Attack Robustness Experiments
+## Data and method names
 
-Run:
-
-```bash
-python curve_repeat.py
-```
-
-This script reads `generate/graph_*.txt`, optimizes each input graph against
-each attack method using simulated annealing, then evaluates every optimized
-graph under every attack method.
-
-Key settings are at the top of `curve_repeat.py`:
-
-- `GRAPH_DIR`: input graph directory, default `generate`
-- `OUT_DIR`: output directory, default `results`
-- `SA_CONFIG`: simulated annealing parameters
-- `POOL_RATIO`: multiprocessing pool size as a fraction of CPU count
-- `SAVE_FINAL_GRAPHS`: whether to save final optimized topologies
-
-Main outputs:
-
-```text
-results/R_mean.csv
-results/sa_progress.csv
-results/curves_each/
-results/curves_avg/
-results/final_graphs/<graph_name>/Original.txt
-results/final_graphs/<graph_name>/Optimized_HDA.txt
-results/final_graphs/<graph_name>/Optimized_CI.txt
-results/final_graphs/<graph_name>/Optimized_CoreHD.txt
-results/final_graphs/<graph_name>/Optimized_EI.txt
-results/final_graphs/<graph_name>/Optimized_FINDER.txt
-```
-
-The current version saves the robustness matrix `R_mean.csv` and robustness
-curves.
-
-### 3. Run Onion Rewiring Baseline
-
-Run:
-
-```bash
-python onion_rewire.py
-```
-
-This script reads the same `generate/graph_*.txt` files and creates a
-degree-preserving onion-style rewired graph for each input.
-
-Main output:
-
-```text
-results/final_graphs/<graph_name>/Optimized_onion.txt
-```
-
-The main configuration is at the top of `onion_rewire.py`, especially `A`,
-`MIN_PAIR_ATTEMPTS`, `PAIR_ATTEMPTS_FACTOR`, `MAX_RESHUFFLE_TRIES`, and
-`RESTARTS`.
-
-### 4. Analyze Network Topology
-
-Run:
-
-```bash
-python topo_index_statistic.py
-```
-
-This script computes topology diagnostics for selected files under
-`results/final_graphs/`, including:
-
-- average nearest-neighbor degree by degree class
-- clustering coefficient by degree class
-- onion-structure statistic `S_k / N_k`
-
-Main outputs:
-
-```text
-results/onion_metrics_outputs/per_graph_metrics.csv
-results/onion_metrics_outputs/per_method_degree_metrics_long.csv
-results/onion_metrics_outputs/topology_diagnostics_triptych.png
-```
-
-If you want to include the onion baseline in the topology plots, make sure the
-`Optimized_onion.txt` pattern is enabled in `TARGET_FILE_PATHS` near the top of
-`topo_index_statistic.py`.
-
-## Attack Methods and References
-
-This repository includes or wraps the following attack methods:
-
-- HDA: high-degree adaptive attack baseline implemented in `HDA.py`
-- CI: Collective Influence attack, adapted with reference to
-  [zhfkt/ComplexCi](https://github.com/zhfkt/ComplexCi)
-- CoreHD: CoreHD attack, adapted with reference to
-  [hcmidt/corehd](https://github.com/hcmidt/corehd)
-- FINDER: deep reinforcement learning based attack, wrapped from `FINDER_ND/`
-  with reference to [FFrankyy/FINDER](https://github.com/FFrankyy/FINDER)
-- EI: Explosive Immunization attack, adapted with reference to
-  [pclus/explosive-immunization](https://github.com/pclus/explosive-immunization)
-
-Please also check the licenses and citation requirements of the referenced
-upstream repositories before redistribution.
-
-## Reproducibility Notes
-
-- Randomness appears in synthetic graph generation, simulated annealing, EI, and
-  onion rewiring. Set the seed values in the corresponding scripts when exact
-  reproducibility is required.
-- `curve_repeat.py` can be computationally expensive because each graph is
-  optimized separately for each attack method.
-- FINDER may create temporary files under `data/` and `finder_output/`; the
-  wrapper removes per-run temporary files by default.
-- Generated folders such as `results/`, `data/`, `finder_output/`, and
-  `__pycache__/` are runtime artifacts.
-
-## Minimal Example
-
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
-
-# 2. Generate synthetic input networks
-python generate.py
-
-# 3. Run robustness optimization and evaluation
-python curve_repeat.py
-
-# 4. Generate onion rewiring baseline
-python onion_rewire.py
-
-# 5. Compute topology diagnostics
-python topo_index_statistic.py
-```
+- The six [synthetic archives](reproduction/archives) contain 300 original graphs, 2,100 optimized graphs, all 16,800 removal orders and curves, the evaluation records and search summaries. Each ZIP is self-contained for its setting and listed in the [SHA-256 manifest](reproduction/sha256.json).
+- USAir97 and EUpower217 each contribute one empirical observation. Their ZIPs supply all 56 measured curves, evaluation records, search summaries and timing totals per setting. The revised EUpower case has 217 nodes and 320 edges.
+- The [diagnostic data](reproduction/diagnostics) include BA500 per-network feedback, bootstrap draws, BA30 before/after evidence, and per-network construction scores. The figures retain the paper’s labels. `Zheng` in the raw records and configuration denotes SRA.
+- The historical root scripts (`generate.py`, `curve_repeat.py` and related scripts) and their [four-method example](results/legacy_demo) belong to the earlier demonstration. The paper workflow uses `reproduce.py` and `python -m run`. [Implementation credits](reproduction/attribution.md).

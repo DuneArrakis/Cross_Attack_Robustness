@@ -1,0 +1,406 @@
+{
+  "after_LCC": 16,
+  "after_R": 0.31,
+  "after_layers": {
+    "O": 0.5666666666666667,
+    "layers": [
+      {
+        "N_k": 10,
+        "S_k": 3,
+        "S_k_over_N_k": 0.3,
+        "k": 3
+      },
+      {
+        "N_k": 6,
+        "S_k": 1,
+        "S_k_over_N_k": 0.16666666666666666,
+        "k": 4
+      },
+      {
+        "N_k": 4,
+        "S_k": 3,
+        "S_k_over_N_k": 0.75,
+        "k": 5
+      },
+      {
+        "N_k": 2,
+        "S_k": 2,
+        "S_k_over_N_k": 1.0,
+        "k": 7
+      },
+      {
+        "N_k": 4,
+        "S_k": 4,
+        "S_k_over_N_k": 1.0,
+        "k": 8
+      },
+      {
+        "N_k": 1,
+        "S_k": 1,
+        "S_k_over_N_k": 1.0,
+        "k": 10
+      },
+      {
+        "N_k": 2,
+        "S_k": 2,
+        "S_k_over_N_k": 1.0,
+        "k": 12
+      },
+      {
+        "N_k": 1,
+        "S_k": 1,
+        "S_k_over_N_k": 1.0,
+        "k": 14
+      }
+    ],
+    "sum_S": 17
+  },
+  "all_pair_selection_metrics": [
+    {
+      "LCC_gain": 8,
+      "delta_O": 0.1333333333333333,
+      "iteration": 208,
+      "minimum_direction_fraction": 0.0,
+      "own_positive_fraction": 1.0,
+      "pair_id": 0,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.0
+    },
+    {
+      "LCC_gain": 8,
+      "delta_O": 0.06666666666666665,
+      "iteration": 168,
+      "minimum_direction_fraction": 0.125,
+      "own_positive_fraction": 1.0,
+      "pair_id": 1,
+      "replicate": 1,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.125
+    },
+    {
+      "LCC_gain": 10,
+      "delta_O": 0.06666666666666665,
+      "iteration": 80,
+      "minimum_direction_fraction": 0.28125,
+      "own_positive_fraction": 0.96875,
+      "pair_id": 2,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.28125
+    },
+    {
+      "LCC_gain": 7,
+      "delta_O": 0.06666666666666665,
+      "iteration": 23,
+      "minimum_direction_fraction": 0.84375,
+      "own_positive_fraction": 1.0,
+      "pair_id": 3,
+      "replicate": 2,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.84375
+    },
+    {
+      "LCC_gain": 10,
+      "delta_O": 0.09999999999999998,
+      "iteration": 80,
+      "minimum_direction_fraction": 0.0625,
+      "own_positive_fraction": 1.0,
+      "pair_id": 4,
+      "replicate": 2,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.0625
+    },
+    {
+      "LCC_gain": 8,
+      "delta_O": 0.09999999999999998,
+      "iteration": 107,
+      "minimum_direction_fraction": 0.40625,
+      "own_positive_fraction": 0.84375,
+      "pair_id": 5,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.40625
+    },
+    {
+      "LCC_gain": 4,
+      "delta_O": 0.06666666666666665,
+      "iteration": 195,
+      "minimum_direction_fraction": 0.03125,
+      "own_positive_fraction": 1.0,
+      "pair_id": 6,
+      "replicate": 1,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.03125
+    },
+    {
+      "LCC_gain": 3,
+      "delta_O": 0.033333333333333326,
+      "iteration": 201,
+      "minimum_direction_fraction": 1.0,
+      "own_positive_fraction": 1.0,
+      "pair_id": 7,
+      "replicate": 0,
+      "robust_contrast": true,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 1.0
+    },
+    {
+      "LCC_gain": 4,
+      "delta_O": 0.033333333333333326,
+      "iteration": 144,
+      "minimum_direction_fraction": 0.6875,
+      "own_positive_fraction": 1.0,
+      "pair_id": 8,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.6875
+    },
+    {
+      "LCC_gain": 4,
+      "delta_O": 0.06666666666666665,
+      "iteration": 78,
+      "minimum_direction_fraction": 1.0,
+      "own_positive_fraction": 1.0,
+      "pair_id": 9,
+      "replicate": 1,
+      "robust_contrast": true,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 1.0
+    },
+    {
+      "LCC_gain": 7,
+      "delta_O": 0.09999999999999998,
+      "iteration": 19,
+      "minimum_direction_fraction": 0.84375,
+      "own_positive_fraction": 1.0,
+      "pair_id": 10,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.84375
+    },
+    {
+      "LCC_gain": 7,
+      "delta_O": 0.09999999999999998,
+      "iteration": 83,
+      "minimum_direction_fraction": 0.46875,
+      "own_positive_fraction": 0.96875,
+      "pair_id": 11,
+      "replicate": 0,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.46875
+    },
+    {
+      "LCC_gain": 8,
+      "delta_O": 0.06666666666666665,
+      "iteration": 160,
+      "minimum_direction_fraction": 1.0,
+      "own_positive_fraction": 1.0,
+      "pair_id": 12,
+      "replicate": 2,
+      "robust_contrast": true,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 1.0
+    },
+    {
+      "LCC_gain": 8,
+      "delta_O": 0.06666666666666665,
+      "iteration": 86,
+      "minimum_direction_fraction": 0.15625,
+      "own_positive_fraction": 1.0,
+      "pair_id": 13,
+      "replicate": 2,
+      "robust_contrast": false,
+      "same_full_attack_order": false,
+      "strongest_other_negative_fraction": 0.15625
+    }
+  ],
+  "before_LCC": 8,
+  "before_R": 0.2777777777777778,
+  "before_layers": {
+    "O": 0.5,
+    "layers": [
+      {
+        "N_k": 10,
+        "S_k": 2,
+        "S_k_over_N_k": 0.2,
+        "k": 3
+      },
+      {
+        "N_k": 6,
+        "S_k": 2,
+        "S_k_over_N_k": 0.3333333333333333,
+        "k": 4
+      },
+      {
+        "N_k": 4,
+        "S_k": 2,
+        "S_k_over_N_k": 0.5,
+        "k": 5
+      },
+      {
+        "N_k": 2,
+        "S_k": 1,
+        "S_k_over_N_k": 0.5,
+        "k": 7
+      },
+      {
+        "N_k": 4,
+        "S_k": 4,
+        "S_k_over_N_k": 1.0,
+        "k": 8
+      },
+      {
+        "N_k": 1,
+        "S_k": 1,
+        "S_k_over_N_k": 1.0,
+        "k": 10
+      },
+      {
+        "N_k": 2,
+        "S_k": 2,
+        "S_k_over_N_k": 1.0,
+        "k": 12
+      },
+      {
+        "N_k": 1,
+        "S_k": 1,
+        "S_k_over_N_k": 1.0,
+        "k": 14
+      }
+    ],
+    "sum_S": 15
+  },
+  "changed_curve_steps": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    20,
+    21
+  ],
+  "changed_layers": [
+    {
+      "N_k": 10,
+      "after_S_k": 3,
+      "before_S_k": 2,
+      "k": 3
+    },
+    {
+      "N_k": 6,
+      "after_S_k": 1,
+      "before_S_k": 2,
+      "k": 4
+    },
+    {
+      "N_k": 4,
+      "after_S_k": 3,
+      "before_S_k": 2,
+      "k": 5
+    },
+    {
+      "N_k": 2,
+      "after_S_k": 2,
+      "before_S_k": 1,
+      "k": 7
+    }
+  ],
+  "exchange": {
+    "LCC_gain": 8,
+    "accepted": true,
+    "added_edges": [
+      [
+        2,
+        17
+      ],
+      [
+        25,
+        29
+      ]
+    ],
+    "after_mask": "56157392046979665765411726631025435093348748912671251337597348337818309847518516519483771996934874327621087291172273013422348931083",
+    "before_mask": "55464224623449462051118349986179765473829346676605367472812903175185184407468176602436023905838179194623447034120149474321045491723",
+    "delta_O": 0.06666666666666665,
+    "iteration": 160,
+    "method": "DomiRank",
+    "native_delta_R": {
+      "CI": 0.015555555555555555,
+      "CoreHD": -0.01,
+      "DomiRank": 0.03222222222222222,
+      "EI": 0.0011111111111111111,
+      "FINDER": 0.011111111111111112,
+      "HDA": 0.013333333333333334,
+      "Zheng": 0.02
+    },
+    "native_delta_area": 29,
+    "negative_targets": 1,
+    "own_delta_R": 0.03222222222222222,
+    "q": 9,
+    "removed_edges": [
+      [
+        2,
+        25
+      ],
+      [
+        17,
+        29
+      ]
+    ],
+    "replicate": 2,
+    "same_full_attack_order": false,
+    "temperature": 0.018207002441589935
+  },
+  "n": 30,
+  "native_delta_R": {
+    "CI": 0.015555555555555555,
+    "CoreHD": -0.01,
+    "DomiRank": 0.03222222222222222,
+    "EI": 0.0011111111111111111,
+    "FINDER": 0.011111111111111112,
+    "HDA": 0.013333333333333334,
+    "Zheng": 0.02
+  },
+  "pair_id": 12,
+  "q": 9,
+  "removed_nodes": [
+    2,
+    4,
+    1,
+    6,
+    9,
+    8,
+    0,
+    3,
+    13
+  ],
+  "same_full_attack_order": false,
+  "same_removed_set_at_q": true,
+  "seed": 6,
+  "selection_metrics": {
+    "LCC_gain": 8,
+    "delta_O": 0.06666666666666665,
+    "iteration": 160,
+    "minimum_direction_fraction": 1.0,
+    "own_positive_fraction": 1.0,
+    "pair_id": 12,
+    "replicate": 2,
+    "robust_contrast": true,
+    "same_full_attack_order": false,
+    "strongest_other_negative_fraction": 1.0
+  },
+  "selection_rule": "Rank audited pairs by (own positive-label fraction >= 0.875 and at least one other negative-label fraction >= 0.875), then minimum of those two fractions, matched-set LCC gain, identical full attack order, layer gain, earliest replicate/iteration. Selection is exploratory; every audited result is retained."
+}

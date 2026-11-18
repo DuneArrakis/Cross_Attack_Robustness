@@ -11,7 +11,7 @@ import math
 num_runs = 50                # Number of graphs to generate
 n_nodes = 500                # Number of nodes
 out_dir = "generate"
-SEED = None                  # Random seed; set to None when reproducibility is not needed
+SEED = 20261016              # Seed for this legacy example
 GRAPH_TYPE = "BA"            # "ER", "BA", or "WS"
 MAX_TRIES_PER_GRAPH = 1000   # Maximum retries per graph
 

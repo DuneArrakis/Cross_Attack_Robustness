@@ -1,0 +1,10 @@
+*
+!run/
+!environment/
+!results/
+results/*
+!results/R_mean.csv
+!reproduction/
+!reproduce.py
+**/__pycache__/
+**/*.pyc

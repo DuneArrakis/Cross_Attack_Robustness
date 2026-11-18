@@ -1,0 +1,105 @@
+{
+  "analysis": {
+    "group_by": "auto",
+    "points": 101,
+    "show_ratio": 0.5,
+    "topology": true
+  },
+  "attack_options": {
+    "CoreHD": {
+      "forest_strategy": "tree_breaking"
+    },
+    "DomiRank": {
+      "update": "static"
+    },
+    "Zheng": {
+      "update": "adaptive"
+    }
+  },
+  "data": {
+    "input_dir": "work/BA_N100/inputs",
+    "pattern": "graph_*.txt"
+  },
+  "evaluation": {
+    "final_graph_dir": null,
+    "graph_types": [
+      "Original",
+      "HDA",
+      "CI",
+      "CoreHD",
+      "EI",
+      "FINDER",
+      "Zheng",
+      "DomiRank"
+    ],
+    "source": "final_graphs"
+  },
+  "evaluation_attacks": [
+    "HDA",
+    "CI",
+    "CoreHD",
+    "EI",
+    "FINDER",
+    "Zheng",
+    "DomiRank"
+  ],
+  "generation": {
+    "ba_m": 3,
+    "ba_n0": 3,
+    "count": 50,
+    "er_p": null,
+    "max_tries": 1000,
+    "n": 100,
+    "output_dir": "work/BA_N100/inputs",
+    "relabel": true,
+    "require_connected": true,
+    "seed": 20261014,
+    "type": "BA",
+    "ws_dim": 1,
+    "ws_nei": 3,
+    "ws_p": 0.1
+  },
+  "onion": {
+    "a": 3,
+    "max_reshuffle_tries": 100000,
+    "min_pair_attempts": 200000,
+    "pair_attempts_factor": 4000,
+    "restarts": 20,
+    "seed_base": 42,
+    "verbose": false
+  },
+  "optimization_attacks": [
+    "HDA",
+    "CI",
+    "CoreHD",
+    "EI",
+    "FINDER",
+    "Zheng",
+    "DomiRank"
+  ],
+  "output_dir": "work/reruns/BA_N100",
+  "resume": true,
+  "sa": {
+    "N_per_iter": 10,
+    "T_max": 0.09,
+    "T_min": 1e-10,
+    "alpha": 0.99,
+    "batch_reference_edges": 1500,
+    "max_iter": 2070,
+    "swap_pairing": "both"
+  },
+  "seeds": {
+    "attack": 42,
+    "optimization": 20261014
+  },
+  "snapshots": {
+    "enabled": true,
+    "max_keep": null,
+    "only_if_improved": false,
+    "save_every": 100,
+    "top_ratio": 0.5,
+    "topk_enabled": false,
+    "topk_only_if_improved": false
+  },
+  "workers": 2
+}

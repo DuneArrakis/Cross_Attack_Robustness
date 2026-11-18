@@ -1,0 +1,47 @@
+{
+  "candidates": [
+    {
+      "contrast_score": 1.6002430533669436,
+      "eligible": true,
+      "endpoint_O_range": 0.15555555555555567,
+      "mean_within_method_O_SD": 0.06387412226427956,
+      "objectives_with_consistent_gain": 7,
+      "seed": 18
+    },
+    {
+      "contrast_score": 1.4473119923808337,
+      "eligible": true,
+      "endpoint_O_range": 0.12222222222222245,
+      "mean_within_method_O_SD": 0.05111440348197933,
+      "objectives_with_consistent_gain": 7,
+      "seed": 0
+    },
+    {
+      "contrast_score": 1.0165841290015625,
+      "eligible": true,
+      "endpoint_O_range": 0.12222222222222245,
+      "mean_within_method_O_SD": 0.08689500658995757,
+      "objectives_with_consistent_gain": 7,
+      "seed": 2
+    },
+    {
+      "contrast_score": 1.6854799313761002,
+      "eligible": true,
+      "endpoint_O_range": 0.1444444444444446,
+      "mean_within_method_O_SD": 0.052365963202647234,
+      "objectives_with_consistent_gain": 7,
+      "seed": 5
+    },
+    {
+      "contrast_score": 2.1864918960306468,
+      "eligible": true,
+      "endpoint_O_range": 0.1888888888888891,
+      "mean_within_method_O_SD": 0.05305568518157523,
+      "objectives_with_consistent_gain": 7,
+      "seed": 6
+    }
+  ],
+  "exploratory": true,
+  "rule": "Among structurally qualified candidates, maximize the number of objectives with positive gain in all three runs; then endpoint O spread divided by (1/N + mean within-objective O SD); then smallest seed. All candidate outcomes are retained.",
+  "selected_seed": 6
+}

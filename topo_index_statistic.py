@@ -50,17 +50,17 @@ except ImportError as e:
 # Config (EDIT HERE)
 # =========================
 TARGET_FILE_PATHS = [
-    r"results/final_graphs/graph_*/Original.txt",
-    r"results/final_graphs/graph_*/Optimized_HDA.txt",
-    r"results/final_graphs/graph_*/Optimized_CI.txt",
-    r"results/final_graphs/graph_*/Optimized_CoreHD.txt",
-    r"results/final_graphs/graph_*/Optimized_EI.txt",
-    r"results/final_graphs/graph_*/Optimized_FINDER.txt",
-    # r"results/final_graphs/graph_*/Optimized_onion.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Original.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Optimized_HDA.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Optimized_CI.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Optimized_CoreHD.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Optimized_EI.txt",
+    r"results/legacy_demo/final_graphs/graph_*/Optimized_FINDER.txt",
+    # r"results/legacy_demo/final_graphs/graph_*/Optimized_onion.txt",
 ]
 
-# OUT_DIR = "results/onion_metrics_outputs_onion_only"
-OUT_DIR = "results/onion_metrics_outputs"
+# OUT_DIR = "results/legacy_demo/onion_metrics_outputs_onion_only"
+OUT_DIR = "results/legacy_demo/onion_metrics_outputs"
 
 # Onion plot trimming
 ONION_PLATEAU = 0.98

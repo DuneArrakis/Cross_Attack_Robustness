@@ -15,8 +15,8 @@ from typing import Dict, List, Set, Tuple, Hashable
 INPUT_DIR = "generate"               # Read generate/graph_*.txt
 INPUT_GLOB = "graph_*.txt"
 
-OUT_ROOT = "results"                 # Output root directory
-FINAL_GRAPH_DIRNAME = "final_graphs" # Output to results/final_graphs/<gname>/Optimized_onion.txt
+OUT_ROOT = "results/legacy_demo"                 # Output root directory
+FINAL_GRAPH_DIRNAME = "final_graphs" # Output to results/legacy_demo/final_graphs/<gname>/Optimized_onion.txt
 OUT_FILENAME = "Optimized_onion.txt"
 
 A = 3             # Onion parameter a

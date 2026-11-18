@@ -1,0 +1,66 @@
+{
+  "BA_N100": {
+    "instances": 50,
+    "nodes": 100,
+    "source": "synthetic",
+    "generation_seed": 20261014,
+    "optimization_seed_base": 20261014,
+    "attack_seed_base": 42
+  },
+  "BA_N1000": {
+    "instances": 50,
+    "nodes": 1000,
+    "source": "synthetic",
+    "generation_seed": 20261017,
+    "optimization_seed_base": 20261017,
+    "attack_seed_base": 42
+  },
+  "BA_N300": {
+    "instances": 50,
+    "nodes": 300,
+    "source": "synthetic",
+    "generation_seed": 20261015,
+    "optimization_seed_base": 20261015,
+    "attack_seed_base": 42
+  },
+  "BA_N500": {
+    "instances": 50,
+    "nodes": 500,
+    "source": "synthetic",
+    "generation_seed": 20261016,
+    "optimization_seed_base": 20261016,
+    "attack_seed_base": 42
+  },
+  "ER_N500": {
+    "instances": 50,
+    "nodes": 500,
+    "source": "synthetic",
+    "generation_seed": 20261018,
+    "optimization_seed_base": 20261018,
+    "attack_seed_base": 42
+  },
+  "EUpower217": {
+    "instances": 1,
+    "nodes": 217,
+    "source": "empirical observations",
+    "generation_seed": null,
+    "optimization_seed_base": 20261014,
+    "attack_seed_base": 42
+  },
+  "USAir97": {
+    "instances": 1,
+    "nodes": 332,
+    "source": "empirical observations",
+    "generation_seed": null,
+    "optimization_seed_base": 20261014,
+    "attack_seed_base": 42
+  },
+  "WS_N500": {
+    "instances": 50,
+    "nodes": 500,
+    "source": "synthetic",
+    "generation_seed": 20261019,
+    "optimization_seed_base": 20261019,
+    "attack_seed_base": 42
+  }
+}

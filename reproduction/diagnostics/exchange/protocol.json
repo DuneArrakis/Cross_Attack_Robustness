@@ -1,0 +1,12 @@
+{
+  "methods": [
+    "HDA",
+    "CI",
+    "CoreHD",
+    "EI",
+    "FINDER",
+    "Zheng",
+    "DomiRank"
+  ],
+  "n": 30
+}

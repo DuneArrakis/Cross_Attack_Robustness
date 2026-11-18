@@ -1,0 +1,4 @@
+reproduction/reference/*.tex text eol=lf
+*.zip binary
+*.npz binary
+*.ckpt.* binary
