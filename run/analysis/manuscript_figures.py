@@ -188,7 +188,7 @@ def feedback(folder):
 
 def structural_variation(table):
     """Small multiples share bounds down each column and print at paper size."""
-    fig, axes = plt.subplots(len(DESIGNS), 4, figsize=(7.35, 6.45),
+    fig, axes = plt.subplots(len(DESIGNS), len(METRICS), figsize=(7.35, 6.45),
                              sharex='col', sharey='col')
     for row, design in enumerate(DESIGNS):
         data = table[table.design == design].sort_values('degree_k')
@@ -202,20 +202,17 @@ def structural_variation(table):
             ax.fill_between(x, mean-sd, mean+sd, where=values['count'].to_numpy() >= 2,
                             color=color, alpha=.20, linewidth=0)
             ax.plot(x, mean, color=color, lw=.9)
-        support = data[data.metric == 'knn']
-        axes[row, 3].plot(support.degree_k, support['count'], color='#606b75', lw=1)
-        axes[row, 0].text(-.27, .5, display_name(design), transform=axes[row, 0].transAxes,
+        axes[row, 0].text(-.19, .5, display_name(design), transform=axes[row, 0].transAxes,
                           ha='right', va='center', fontsize=8)
         for ax in axes[row]:
             tidy(ax)
             ax.tick_params(labelsize=7, width=.5, pad=2)
-    for col, name in enumerate(list(LABELS) + ['Networks']):
+    for col, name in enumerate(LABELS):
         axes[0, col].set_title(name, fontsize=9)
-    for col in (0, 1, 3):
+    for col in (0, 1):
         axes[-1,col].set_xticks([0, 40, 80])
     axes[-1,2].set_xticks([2, 4, 6, 8, 10])
     axes[-1,2].set_xlim(1.5, 10.25)
-    axes[-1,3].set_yticks([0, 50])
     fig.text(.54, .018, r'Degree $k$', ha='center')
     fig.subplots_adjust(left=.15, right=.993, top=.956, bottom=.072, wspace=.31, hspace=.20)
     save(fig, 'topology_uncertainty')
