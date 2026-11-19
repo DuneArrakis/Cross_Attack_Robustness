@@ -295,7 +295,7 @@ def tables(formal, synthetic, empirical):
         for key in SETTINGS:
             values = summary[key].loc['mean']
             val = ('%.3f' if key in SETTINGS[:6] else '%.4f') % values[design]
-            if design == values[METHODS].idxmax():
+            if values[design] == values.max():
                 val = r'\textbf{' + val + '}'
             line.append(val)
         rows.append(line)
