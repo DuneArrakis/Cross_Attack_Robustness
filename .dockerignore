@@ -4,6 +4,7 @@
 !results/
 results/*
 !results/R_mean.csv
+!real_data/
 !reproduction/
 !reproduce.py
 **/__pycache__/

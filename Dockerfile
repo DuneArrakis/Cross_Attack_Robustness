@@ -14,6 +14,7 @@ RUN cd run/vendor/FINDER_ND && python setup.py build_ext --inplace --force
 
 FROM runtime AS publication
 COPY run /work/run
+COPY real_data /work/real_data
 COPY reproduction /work/reproduction
 COPY results/R_mean.csv /work/results/R_mean.csv
 COPY reproduce.py /work/reproduce.py

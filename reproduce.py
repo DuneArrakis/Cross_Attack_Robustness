@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from run.datasets.io import load_graph, save_igraph_edgelist
 from run.analysis import manuscript_figures as paper
 from run.analysis.statistics import describe
 from run.analysis.topology import topology_tables
@@ -62,6 +63,19 @@ def check_graph(archive, row):
     return graph
 
 
+def check_empirical_input(setting, records):
+    """Tie the public edge list to all seven original-network evaluations."""
+    metadata = json.loads((SOURCES / 'settings.json').read_text())[setting]
+    path = ROOT / metadata['input_file']
+    graph = load_graph(path)
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    originals = records[records.design == 'Original']
+    if (not graph.is_connected() or set(originals.graph_sha256) != {digest}
+            or set(originals.n_nodes) != {graph.vcount()} or graph.vcount() != metadata['nodes']
+            or set(originals.n_edges) != {graph.ecount()} or graph.ecount() != metadata['edges']):
+        raise ValueError('Empirical input disagrees with the archived observations: ' + str(path))
+
+
 def collect(setting, out, replay):
     dest = out / setting
     dest.mkdir(parents=True, exist_ok=True)
@@ -78,6 +92,8 @@ def collect(setting, out, replay):
             raise ValueError('Incomplete evaluation blocks in ' + setting)
         if synthetic:
             check_seeds(archive, config, setting)
+        else:
+            check_empirical_input(setting, data)
         for row in data.itertuples():
             raw = numeric_csv(archive, row.curve_path, 3)
             steps = np.arange(row.n_nodes + 1)
@@ -129,6 +145,10 @@ def collect(setting, out, replay):
         if list(public.index) != list(reference.index) or list(public.columns) != list(reference.columns):
             raise ValueError('Matrix labels or order differ from the published matrix')
         np.testing.assert_allclose(public.values, reference.values, atol=1e-12, rtol=0)
+        # Hold the test set fixed across the two designs, excluding both training objectives.
+        shared = public.loc[['HDA', 'DomiRank']].drop(columns=['HDA', 'DomiRank']).mean(axis=1)
+        shared.rename('mean_R').to_csv(dest / 'five_common_attacks.csv', header=True)
+        np.testing.assert_allclose(shared.values, [0.2648, 0.2665], atol=0.00005, rtol=0)
         rankings = pd.DataFrame([dict(describe(group.sort_values('instance_id').R.values), design=design)
                                  for design, group in means.groupby('design')])
         ref = pd.read_csv(SOURCES/'reference/BA500_intervals.csv').set_index('design')
@@ -169,6 +189,54 @@ def check_feedback(folder):
             np.testing.assert_allclose(np.r_[values.mean(),endpoints],expected,rtol=0,atol=1e-12)
 
 
+def check_common_swaps(folder, out):
+    """Use one vote per input graph for the fixed-candidate comparison."""
+    methods = ['SRA' if attack == 'Zheng' else attack for attack in paper.METHODS]
+    swaps = pd.read_csv(folder / 'common_swaps.csv')
+    if (swaps.instance_id.nunique() != 20 or swaps.duplicated(['instance_id', 'proposal_id']).any()
+            or swaps[methods].isna().any().any()):
+        raise ValueError('Incomplete common-candidate observations')
+    changing = swaps.loc[swaps.delta_layer_size != 0].copy()
+    changing['direction'] = np.where(changing.delta_layer_size > 0, 'increase', 'decrease')
+    long = changing.melt(id_vars=['instance_id', 'direction'], value_vars=methods,
+                         var_name='attack', value_name='delta_sum_lcc')
+    long['improved'] = (long.delta_sum_lcc > 0).astype('int64')
+    keys = ['instance_id', 'attack', 'direction']
+    counts = long.groupby(keys).improved.agg(['size', 'sum'])
+    counts.columns = ['n_scored', 'n_improved']
+    reference = pd.read_csv(folder / 'common_swap_counts.csv').set_index(keys).sort_index()
+    pd.testing.assert_frame_equal(counts, reference)
+    rates = (counts.n_improved / counts.n_scored).unstack('direction')
+    if len(rates) != 20 * len(methods) or rates.isna().any().any():
+        raise ValueError('Both directions are required for every graph and attack')
+    gap = 100 * (rates.increase - rates.decrease).groupby(level='attack').mean()
+    gap.rename('difference_percentage_points').to_csv(out / 'common_swap_feedback.csv', header=True)
+    np.testing.assert_allclose(gap.loc[['DomiRank', 'HDA', 'EI']], [43.5, 26.9, 13.3],
+                               atol=0.05, rtol=0)
+
+
+def check_rings(out, setting, instance):
+    """Reconstruct both Fig. 8 rings for one synthetic input and check the saved hashes."""
+    from run.optimization.onion_ring import generate_ring
+
+    seeds = pd.read_csv(SOURCES / 'diagnostics/onion/ring_seeds.csv')
+    rows = seeds[(seeds.setting == setting) & (seeds.instance_id == instance)]
+    if setting not in paper.SETTINGS[:6] or sorted(rows.order) != ['degree', 'random']:
+        raise ValueError('Choose a synthetic setting and instance listed in ring_seeds.csv')
+    dest = out / 'rings' / setting / instance
+    dest.mkdir(parents=True, exist_ok=True)
+    with open_setting(setting) as archive:
+        input_path = archive.extract('inputs/' + instance + '.txt', str(dest))
+    original = load_graph(input_path)
+    for record in rows.itertuples():
+        graph = generate_ring(original.degree(), record.order, record.seed)
+        path = dest / (record.order + '.txt')
+        save_igraph_edgelist(graph, path)
+        if hashlib.sha256(path.read_bytes()).hexdigest() != record.graph_sha256:
+            raise ValueError('Reconstructed ring differs from the measured graph: ' + str(path))
+    print('{} {}: both ring constructions match the archived graph hashes.'.format(setting, instance))
+
+
 def check_example(out):
     """Repeat one full-budget BA100/HDA optimization and all seven final evaluations."""
     from run.config import load_config
@@ -207,8 +275,13 @@ def main():
                         help='repeat a full-budget BA100 HDA search and evaluate both graphs under all seven methods')
     parser.add_argument('--extract-inputs', choices=paper.SETTINGS[:6], metavar='SETTING',
                         help='only unpack the exact synthetic input graphs for a new optimization run')
+    parser.add_argument('--check-rings', nargs=2, metavar=('SETTING', 'INSTANCE'),
+                        help='regenerate both Fig. 8 rings for one synthetic input')
     args = parser.parse_args()
     out = args.out.resolve()
+    if args.check_rings:
+        check_rings(out, *args.check_rings)
+        return
     if args.check_example:
         check_example(out)
         return
@@ -229,12 +302,14 @@ def main():
             if (paper.ASSETS/name).read_bytes() != (SOURCES/'reference'/name).read_bytes():
                 raise ValueError('Typeset table differs from the manuscript: ' + name)
         diagnostics = SOURCES/'diagnostics'
+        check_common_swaps(diagnostics / 'feedback', folders['BA_N500'])
         check_feedback(diagnostics/'feedback')
         paper.feedback(diagnostics/'feedback')
         data, positions = paper.load_data(diagnostics/'exchange')
         figure, _ = paper.make_figure(data, positions)
         paper.save(figure, 'exchange')
         paper.onion(diagnostics/'onion')
+    print('Both empirical inputs, the BA500 five-attack means and the common-swap feedback verified.')
     print('Fig. 4 matrix and intervals, Table 2, and both Appendix A tables verified.')
     print('Figures and LaTeX rows written to {}'.format(paper.ASSETS))
 

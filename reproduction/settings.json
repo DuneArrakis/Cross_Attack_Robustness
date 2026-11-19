@@ -45,7 +45,9 @@
     "source": "empirical observations",
     "generation_seed": null,
     "optimization_seed_base": 20261014,
-    "attack_seed_base": 42
+    "attack_seed_base": 42,
+    "input_file": "real_data/graph_EUpower.txt",
+    "edges": 320
   },
   "USAir97": {
     "instances": 1,
@@ -53,7 +55,9 @@
     "source": "empirical observations",
     "generation_seed": null,
     "optimization_seed_base": 20261014,
-    "attack_seed_base": 42
+    "attack_seed_base": 42,
+    "input_file": "real_data/graph_USAir97_0.txt",
+    "edges": 2126
   },
   "WS_N500": {
     "instances": 50,

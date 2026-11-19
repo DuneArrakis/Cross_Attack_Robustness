@@ -2,3 +2,4 @@ reproduction/reference/*.tex text eol=lf
 *.zip binary
 *.npz binary
 *.ckpt.* binary
+real_data/*.txt text eol=lf
