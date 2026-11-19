@@ -14,15 +14,16 @@ docker run --platform linux/amd64 --rm --user "$(id -u):$(id -g)" \
   python reproduce.py --replay-orders
 ```
 
-The command checks the archive hashes, verifies the two [empirical input graphs](real_data/README.md) against the original evaluation records, and computes robustness from all 16,912 full-resolution curves. On the synthetic networks it also reconstructs the curves from saved graphs and removal orders. Omit `--replay-orders` for the faster curve-based check. Both commands regenerate the following outputs.
+The command checks the archive hashes, verifies the two [empirical input graphs](real_data/README.md) against the original evaluation records, and computes robustness from the 16,912 original-network and optimized-design curves. It also verifies the 700 BA500 construction curves used in Fig. 8 against their measured scores. On the synthetic networks it also reconstructs the curves from saved graphs and removal orders. Omit `--replay-orders` for the faster curve-based check. Both commands regenerate the following outputs.
 
 | Manuscript | Output under `work/` | Source |
 | --- | --- | --- |
-| Fig. 3 | `figures/curves.pdf` | BA500 curves averaged on a common removal grid |
+| Fig. 3 | `figures/curves.pdf` | BA500 curves averaged on a common removal grid, displayed through 50% removal |
 | Fig. 4 | `figures/matrix.pdf`, `BA_N500/R_mean.csv`, `BA_N500/defense_ranking.csv` | Raw curves, one design mean per input, paired input resampling |
 | Fig. 5 and Appendix B | `figures/topology.pdf`, `figures/topology_uncertainty.pdf` | Rewired and original BA500 edge lists |
-| Figs. 6–8 | `figures/feedback.pdf`, `figures/exchange.pdf`, `figures/onion.pdf` | Measured trajectories and candidate statistics, the selected BA30 exchange, and paired construction scores |
-| Table 2 | `figures/design_rows.tex` | Within-network seven-attack means, followed by the across-network mean and sample SD |
+| Figs. 6–7 | `figures/feedback.pdf`, `figures/exchange.pdf` | Measured trajectories, candidate statistics and the selected BA30 exchange |
+| Fig. 8 | `figures/onion.pdf` | Curves for HDA, DomiRank, Wu–Holme and Modified Onion on 50 matched BA500 degree sequences |
+| Table 2 | `figures/design_rows.tex` | Seven-attack means for the original graph, seven optimization targets and two direct constructions. Synthetic cells give the across-network mean and sample SD |
 | Appendix A | `figures/original_rows.tex`, `figures/timing_rows.tex` | Original-network scores and measured CPU time for initial and candidate evaluations |
 
 The script compares all Fig. 4 cells, design means and bootstrap endpoints with the published numerical records. It also checks the three LaTeX tables against the rows used in the manuscript. The input network is the resampling unit for the 10,000 bootstrap draws (seed 20261014). For a graph with `N` nodes, each archived curve gives `LCC(q)/N` in the column named `R`. The scalar robustness is the sum of that column over `q = 1, …, N` divided by `N`.
@@ -49,9 +50,13 @@ docker run --platform linux/amd64 --rm --user "$(id -u):$(id -g)" \
 
 Each [synthetic configuration](reproduction/configs) records its graph-generation seed, optimization and evaluation seed bases, annealing schedule and method options. Each archive contains the actual task seeds. The machine-readable [settings table](reproduction/settings.json) lists all eight settings. CPU hours in Appendix A were measured on the original runs and will depend on the host during a rerun.
 
-## Reconstruct the rings in Fig. 8
+## Direct constructions in Fig. 8 and Table 2
 
-The [construction seeds and graph checksums](reproduction/diagnostics/onion/ring_seeds.csv) cover both variants on all 300 synthetic inputs. For each input the degree-ordered and random rings use the same starting degree sequence and seed. The [constructor](run/optimization/onion_ring.py) reserves the ring and leaf edges before pairing the remaining stubs with the degree-layer preference used in the paper.
+The [BA500 construction curves](reproduction/diagnostics/onion/BA500_construction_curves.npz) store integer largest-component sizes for every removal count from 0 to 500. The array axes are design, input network, test attack and removal count. The first three axes have label arrays in the same file. The keys `onion` and `backbone_rank_a3` identify Wu–Holme and Modified Onion. Fig. 8 plots the first half of each mean curve. All scalar scores use the complete sequence.
+
+The [synthetic scores](reproduction/diagnostics/onion/tables/per_graph_scores.csv) and [empirical scores](reproduction/diagnostics/onion/empirical_construction_scores.csv) supply the two construction rows of Table 2. USAir97 has five Modified Onion realizations on its one 332-node degree sequence. The other empirical construction entries each use one realization.
+
+The [construction seeds and graph checksums](reproduction/diagnostics/onion/ring_seeds.csv) cover Modified Onion and an archived random-order control on all 300 synthetic inputs. For each input the degree-ordered and random rings use the same starting degree sequence and seed. The [constructor](run/optimization/onion_ring.py) reserves the ring and leaf edges before pairing the remaining stubs with the degree-layer preference used in the paper.
 
 The following command builds both variants for one input, checks their graph files against the original measurements, and writes the edge lists under `work/rings/`. Choose any setting and instance listed in the seed table.
 

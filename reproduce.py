@@ -158,7 +158,9 @@ def collect(setting, out, replay):
         rows = [dict(attack=attack,design=design,x=x,lcc_fraction=value)
                 for (attack,design), values in curves.items()
                 for x,value in zip(GRID,np.mean(values,axis=0))]
-        paper.curves(pd.DataFrame(rows))
+        mean_curves = pd.DataFrame(rows)
+        mean_curves.to_csv(dest/'mean_curves.csv', index=False)
+        paper.curves(mean_curves)
         paper.matrix_figure(matrix.reset_index(), rankings)
         paper.topology(structure)
         paper.structural_variation(structure)
@@ -276,7 +278,7 @@ def main():
     parser.add_argument('--extract-inputs', choices=paper.SETTINGS[:6], metavar='SETTING',
                         help='only unpack the exact synthetic input graphs for a new optimization run')
     parser.add_argument('--check-rings', nargs=2, metavar=('SETTING', 'INSTANCE'),
-                        help='regenerate both Fig. 8 rings for one synthetic input')
+                        help='regenerate the modified Onion ring and archived random control for one synthetic input')
     args = parser.parse_args()
     out = args.out.resolve()
     if args.check_rings:
@@ -297,19 +299,24 @@ def main():
                                  'ytick.labelsize':8,'axes.linewidth':.7})
     with plt.rc_context(style):
         folders = {setting:collect(setting,out, args.replay_orders) for setting in paper.SETTINGS}
-        paper.tables(folders)
+        diagnostics = SOURCES/'diagnostics'
+        onion_data = diagnostics/'onion'
+        synthetic = pd.read_csv(onion_data/'tables/per_graph_scores.csv')
+        empirical = pd.read_csv(onion_data/'empirical_construction_scores.csv')
+        paper.tables(folders, synthetic, empirical)
         for name in ['design_rows.tex','original_rows.tex','timing_rows.tex']:
             if (paper.ASSETS/name).read_bytes() != (SOURCES/'reference'/name).read_bytes():
                 raise ValueError('Typeset table differs from the manuscript: ' + name)
-        diagnostics = SOURCES/'diagnostics'
         check_common_swaps(diagnostics / 'feedback', folders['BA_N500'])
         check_feedback(diagnostics/'feedback')
         paper.feedback(diagnostics/'feedback')
         data, positions = paper.load_data(diagnostics/'exchange')
         figure, _ = paper.make_figure(data, positions)
         paper.save(figure, 'exchange')
-        paper.onion(diagnostics/'onion')
+        with np.load(onion_data/'BA500_construction_curves.npz', allow_pickle=False) as bundle:
+            paper.onion(pd.read_csv(folders['BA_N500']/'mean_curves.csv'), synthetic, bundle)
     print('Both empirical inputs, the BA500 five-attack means and the common-swap feedback verified.')
+    print('Verified all 700 BA500 construction curves used in Fig. 8 against their measured scores.')
     print('Fig. 4 matrix and intervals, Table 2, and both Appendix A tables verified.')
     print('Figures and LaTeX rows written to {}'.format(paper.ASSETS))
 
