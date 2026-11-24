@@ -123,6 +123,14 @@ def matrix_figure(table, rankings):
     matrix.set_xticks(range(len(METHODS)))
     matrix.set_xticklabels([display_name(m) for m in METHODS], fontsize=8.1)
     matrix.set(xlabel='Test attack', ylabel='Optimization attack')
+    # The baseline row and rewired designs share the same R scale.
+    scale_ax = matrix.inset_axes([.20, -.258, .64, .04])
+    colorbar = fig.colorbar(matrix.images[0], cax=scale_ax, orientation='horizontal',
+                            ticks=[.20, .25, .30, .35, .40], format='%.2f')
+    scale_ax.text(-.035, .5, r'$R$', transform=scale_ax.transAxes,
+                  ha='right', va='center', fontsize=9, color=INK)
+    scale_ax.tick_params(axis='x', labelsize=8, length=2, pad=1.5)
+    colorbar.outline.set_linewidth(.5)
     positions = np.arange(len(METHODS))
     for i in positions:
         matrix.add_patch(Rectangle((i-.47, i-.47), .94, .94, fill=False,
