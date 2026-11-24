@@ -15,16 +15,19 @@ import igraph as ig
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from scipy.stats import t, wilcoxon
 
 from run.datasets.io import load_graph, save_igraph_edgelist
 from run.analysis import manuscript_figures as paper
-from run.analysis.statistics import describe
+from run.analysis.appendix_tables import write_appendix_tables
+from run.analysis.statistics import describe, holm_adjust, statistics_tables
 from run.analysis.topology import topology_tables
 from run.attacks.common import lcc_curve_from_order, robustness_from_curve
 
 ROOT = Path(__file__).resolve().parent
 SOURCES = ROOT / 'reproduction'
 GRID = np.linspace(0, 1, 101)
+SUPPLEMENT = ROOT / 'results/appendix_c_statistics.zip'
 
 
 def numeric_csv(archive, path, width):
@@ -74,6 +77,36 @@ def check_empirical_input(setting, records):
             or set(originals.n_nodes) != {graph.vcount()} or graph.vcount() != metadata['nodes']
             or set(originals.n_edges) != {graph.ecount()} or graph.ecount() != metadata['edges']):
         raise ValueError('Empirical input disagrees with the archived observations: ' + str(path))
+
+
+def check_robustness_statistics(setting, observations, dest):
+    """Rebuild the published means, intervals and paired tests from the scored curves."""
+    with ZipFile(SUPPLEMENT) as archive:
+        summary_ref = pd.read_csv(archive.open('01_robustness.csv'))
+        paired_ref = pd.read_csv(archive.open('02_paired_tests.csv'))
+    summary_ref = summary_ref.loc[summary_ref.setting == setting].drop(columns='setting')
+    # The archived analysis order fixes the sign of each left-minus-right contrast.
+    attacks = [a for a in summary_ref.attack.unique() if a != 'Mean_over_attacks']
+    designs = list(summary_ref.design.unique())
+    labeled = observations.replace({'design': {'Zheng': 'SRA'}, 'attack': {'Zheng': 'SRA'}})
+    summary, paired = statistics_tables(labeled, designs, attacks, dest)
+    compare_records(summary, summary_ref, ['design', 'attack'])
+    if setting in paper.SETTINGS[:6]:
+        paired_ref = paired_ref.loc[paired_ref.setting == setting].drop(columns='setting')
+        compare_records(paired, paired_ref, ['family', 'left', 'right'])
+
+
+def compare_records(actual, expected, keys):
+    actual = actual.set_index(keys).sort_index()
+    expected = expected.set_index(keys).sort_index()
+    if not actual.index.equals(expected.index) or set(actual.columns) != set(expected.columns):
+        raise ValueError('Incomplete Appendix C statistical table')
+    numeric = expected.select_dtypes(include=np.number).columns
+    np.testing.assert_allclose(actual[numeric].values, expected[numeric].values,
+                               rtol=1e-10, atol=1e-12, equal_nan=True)
+    labels = expected.columns.difference(numeric)
+    if not actual[labels].equals(expected[labels]):
+        raise ValueError('Appendix C statistical labels differ')
 
 
 def collect(setting, out, replay):
@@ -133,6 +166,7 @@ def collect(setting, out, replay):
                 graph_rows.at[idx, 'graph_path'] = str(target)
             structure = topology_tables(graph_rows, dest)
     data['R'] = scores
+    check_robustness_statistics(setting, data, dest)
     original = data.loc[data.design == 'Original', ['instance_id','attack','R']]
     original.to_csv(dest/'original_attack_per_instance.csv', index=False)
     means = data[data.design != 'Original'].groupby(['instance_id','design']).R.mean().reset_index()
@@ -215,6 +249,68 @@ def check_common_swaps(folder, out):
     gap.rename('difference_percentage_points').to_csv(out / 'common_swap_feedback.csv', header=True)
     np.testing.assert_allclose(gap.loc[['DomiRank', 'HDA', 'EI']], [43.5, 26.9, 13.3],
                                atol=0.05, rtol=0)
+
+    # The common-candidate experiment has its own twenty-network bootstrap.
+    with np.load(str(folder/'common_candidate_bootstrap.npz')) as draws:
+        ids = draws['instance_ids'].tolist()
+        indices = draws['indices']
+    if indices.shape != (10000,20) or set(ids) != set(swaps.instance_id):
+        raise ValueError('Incomplete common-candidate bootstrap design')
+    with ZipFile(SUPPLEMENT) as archive:
+        reference = pd.read_csv(archive.open('08_common_candidates.csv'))
+        contrasts = pd.read_csv(archive.open('09_common_candidate_contrasts.csv'))
+    by_attack = {}
+    def check_estimate(values, expected):
+        endpoints = np.percentile(values[indices].mean(axis=1), [2.5,97.5])
+        np.testing.assert_allclose(np.r_[values.mean(),endpoints],expected,rtol=0,atol=1e-12)
+    for row in reference.itertuples():
+        sample = rates.xs(row.attack,level='attack').loc[ids]
+        direction = 'increase' if row.stratum == 'O_plus' else 'decrease'
+        check_estimate(sample[direction].values,[row.mean_p,row.ci95_low,row.ci95_high])
+        difference = (sample.increase-sample.decrease).values
+        by_attack[row.attack] = difference
+        check_estimate(difference,[row.paired_direction_difference,
+                                   row.difference_ci95_low,row.difference_ci95_high])
+    for row in contrasts.itertuples():
+        check_estimate(by_attack[row.left]-by_attack[row.right],
+                       [row.mean_difference,row.ci95_low,row.ci95_high])
+
+
+def check_construction_statistics(scores):
+    """Check t intervals and the original 18-test Holm family for each metric."""
+    with ZipFile(SUPPLEMENT) as archive:
+        means = pd.read_csv(archive.open('10_construction_scores.csv'))
+        contrasts = pd.read_csv(archive.open('11_construction_contrasts.csv'))
+    labels = {'Wu-Holme':'onion', 'Modified Onion':'backbone_rank_a3', 'SRA':'Zheng'}
+    def check_interval(values, row):
+        if len(values) != row['count']:
+            raise ValueError('Incomplete construction pairs')
+        mean = values.mean()
+        sd = values.std(ddof=1)
+        half = t.ppf(.975, len(values)-1) * sd / np.sqrt(len(values))
+        np.testing.assert_allclose([mean,sd,mean-half,mean+half],
+            [row['mean'],row['std'],row.ci95_low,row.ci95_high], rtol=0, atol=1e-12)
+    by_design = scores.set_index(['family','design','instance_id']).sort_index()
+    for _,row in means.iterrows():
+        metric = labels.get(row.metric, row.metric)
+        check_interval(by_design.loc[(row.family, labels[row.design]),metric].values, row)
+    random = 'backbone_random_rank_a3'
+    ordered = 'backbone_rank_a3'
+    for metric,group in contrasts.groupby('metric'):
+        raw_p = []
+        column = labels.get(metric, metric)
+        for _,row in group.iterrows():
+            for left,right in [(ordered,'onion'), (ordered,random), (random,'onion')]:
+                # Pandas aligns construction scores on the original input ID.
+                difference = (by_design.loc[(row.family,left),column] -
+                              by_design.loc[(row.family,right),column]).values
+                rounded = np.round(difference,12)
+                w,p = wilcoxon(rounded, zero_method='wilcox', alternative='two-sided')
+                raw_p.append(p)
+                if right == 'onion' and left == ordered:
+                    check_interval(difference,row)
+                    np.testing.assert_allclose([w,p], [row.wilcoxon_statistic,row.p_value], rtol=1e-10)
+        np.testing.assert_allclose(holm_adjust(raw_p)[::3],group.p_holm.values,rtol=1e-10,atol=0)
 
 
 def check_rings(out, setting, instance):
@@ -304,9 +400,11 @@ def main():
         synthetic = pd.read_csv(onion_data/'tables/per_graph_scores.csv')
         empirical = pd.read_csv(onion_data/'empirical_construction_scores.csv')
         paper.tables(folders, synthetic, empirical)
+        check_construction_statistics(synthetic)
         for name in ['design_rows.tex','original_rows.tex','timing_rows.tex']:
             if (paper.ASSETS/name).read_bytes() != (SOURCES/'reference'/name).read_bytes():
                 raise ValueError('Typeset table differs from the manuscript: ' + name)
+        write_appendix_tables(SUPPLEMENT, paper.ASSETS)
         check_common_swaps(diagnostics / 'feedback', folders['BA_N500'])
         check_feedback(diagnostics/'feedback')
         paper.feedback(diagnostics/'feedback')
@@ -318,6 +416,7 @@ def main():
     print('Both empirical inputs, the BA500 five-attack means and the common-swap feedback verified.')
     print('Verified all 700 BA500 construction curves used in Fig. 8 against their measured scores.')
     print('Fig. 4 matrix and intervals, Table 2, and both Appendix A tables verified.')
+    print('Appendix C robustness summaries and 1,470 paired tests verified across settings.')
     print('Figures and LaTeX rows written to {}'.format(paper.ASSETS))
 
 

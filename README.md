@@ -25,10 +25,11 @@ The command checks the archive hashes, verifies the two [empirical input graphs]
 | Fig. 8 | `figures/onion.pdf` | Curves for HDA, DomiRank, Wu–Holme and Modified Onion on 50 matched BA500 degree sequences |
 | Table 2 | `figures/design_rows.tex` | Seven-attack means for the original graph, seven optimization targets and two direct constructions. Synthetic cells give the across-network mean and sample SD |
 | Appendix A | `figures/original_rows.tex`, `figures/timing_rows.tex` | Original-network scores and test-attack ranks before and after rewiring (Table 3), plus CPU time for initial and candidate evaluations (Table 4) |
+| Appendix C, Tables 5–9 | Five LaTeX tables in `figures/`, plus `cross_attack_summary.csv` and `paired_comparisons.csv` in each setting directory | [Statistical supplement with 13 CSV tables and a field guide](results/appendix_c_statistics.zip) |
 
 For every setting, `R_mean.csv` gives the underlying scores for Table 3. Each row fixes the design. Sorting the test attacks by increasing robustness across that row, before rounding, gives their effectiveness ranks.
 
-The script compares all Fig. 4 cells, design means and bootstrap endpoints with the published numerical records. It also checks the three LaTeX tables against the rows used in the manuscript. The input network is the resampling unit for the 10,000 bootstrap draws (seed 20261014). For a graph with `N` nodes, each archived curve gives `LCC(q)/N` in the column named `R`. The scalar robustness is the sum of that column over `q = 1, …, N` divided by `N`.
+The script compares all Fig. 4 cells, design means and bootstrap endpoints with the published numerical records. It checks the Table 2 and Appendix A LaTeX rows and recomputes all 512 original/optimized robustness summaries and 1,470 synthetic-network paired comparisons in Appendix C from the scored curves. The input network is the resampling unit for the 10,000 bootstrap draws (seed 20261014). For a graph with `N` nodes, each archived curve gives `LCC(q)/N` in the column named `R`. The scalar robustness is the sum of that column over `q = 1, …, N` divided by `N`.
 
 Section 3.2 compares HDA and DomiRank on the five attacks shared by both designs after excluding their two optimization objectives. The script writes these means to `work/BA_N500/five_common_attacks.csv` (HDA 0.264841488, DomiRank 0.266510368). The [common-candidate data](reproduction/diagnostics/feedback/README.md) document a separate comparison of how seven objectives scored the same BA500 swaps.
 

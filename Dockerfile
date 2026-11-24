@@ -16,6 +16,6 @@ FROM runtime AS publication
 COPY run /work/run
 COPY real_data /work/real_data
 COPY reproduction /work/reproduction
-COPY results/R_mean.csv /work/results/R_mean.csv
+COPY results/R_mean.csv results/appendix_c_statistics.zip /work/results/
 COPY reproduce.py /work/reproduce.py
 CMD ["python", "reproduce.py"]

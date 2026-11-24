@@ -10,3 +10,5 @@ The common-candidate comparison uses 20 original BA500 networks. Within each net
 | [common_swap_counts.csv](common_swap_counts.csv) | One row per input, objective and direction of layer change | `n_scored` counts common candidates in that direction. `n_improved` counts those that strictly improved the objective. |
 
 For each input and objective, divide the number of improvements by the number scored separately for increasing and decreasing layer connectivity. Subtract the decreasing-group rate from the increasing-group rate, then average the paired differences over the 20 inputs. Swaps with unchanged layer connectivity remain in the observations and contribute to neither rate. The main reproduction command checks the individual counts and writes the seven differences, in percentage points, to `work/BA_N500/common_swap_feedback.csv`. The three comparisons reported to the reviewer are 43.5 for DomiRank, 26.9 for HDA and 13.3 for EI.
+
+The file `common_candidate_bootstrap.npz` contains the 10,000 resamples and the ordered IDs of the 20 original networks used for electronic Tables 08–09 in Appendix C.

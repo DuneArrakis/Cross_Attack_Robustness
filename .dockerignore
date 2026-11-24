@@ -4,6 +4,7 @@
 !results/
 results/*
 !results/R_mean.csv
+!results/appendix_c_statistics.zip
 !real_data/
 !reproduction/
 !reproduce.py
