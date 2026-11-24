@@ -137,10 +137,10 @@ def collect(setting, out, replay):
     original.to_csv(dest/'original_attack_per_instance.csv', index=False)
     means = data[data.design != 'Original'].groupby(['instance_id','design']).R.mean().reset_index()
     means.to_csv(dest/'defense_per_instance.csv', index=False)
+    matrix = data.pivot_table(index='design', columns='attack', values='R').loc[paper.DESIGNS,paper.METHODS]
+    public = matrix.rename(index={'Zheng':'SRA'}, columns={'Zheng':'SRA'})
+    public.to_csv(dest/'R_mean.csv')
     if setting == 'BA_N500':
-        matrix = data.pivot_table(index='design', columns='attack', values='R').loc[paper.DESIGNS,paper.METHODS]
-        public = matrix.rename(index={'Zheng':'SRA'}, columns={'Zheng':'SRA'})
-        public.to_csv(dest/'R_mean.csv')
         reference = pd.read_csv(ROOT/'results/R_mean.csv', index_col='design')
         if list(public.index) != list(reference.index) or list(public.columns) != list(reference.columns):
             raise ValueError('Matrix labels or order differ from the published matrix')

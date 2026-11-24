@@ -24,7 +24,9 @@ The command checks the archive hashes, verifies the two [empirical input graphs]
 | Figs. 6–7 | `figures/feedback.pdf`, `figures/exchange.pdf` | Measured trajectories, candidate statistics and the selected BA30 exchange |
 | Fig. 8 | `figures/onion.pdf` | Curves for HDA, DomiRank, Wu–Holme and Modified Onion on 50 matched BA500 degree sequences |
 | Table 2 | `figures/design_rows.tex` | Seven-attack means for the original graph, seven optimization targets and two direct constructions. Synthetic cells give the across-network mean and sample SD |
-| Appendix A | `figures/original_rows.tex`, `figures/timing_rows.tex` | Original-network scores and measured CPU time for initial and candidate evaluations |
+| Appendix A | `figures/original_rows.tex`, `figures/timing_rows.tex` | Original-network scores and test-attack ranks before and after rewiring (Table 3), plus CPU time for initial and candidate evaluations (Table 4) |
+
+For every setting, `R_mean.csv` gives the underlying scores for Table 3. Each row fixes the design. Sorting the test attacks by increasing robustness across that row, before rounding, gives their effectiveness ranks.
 
 The script compares all Fig. 4 cells, design means and bootstrap endpoints with the published numerical records. It also checks the three LaTeX tables against the rows used in the manuscript. The input network is the resampling unit for the 10,000 bootstrap draws (seed 20261014). For a graph with `N` nodes, each archived curve gives `LCC(q)/N` in the column named `R`. The scalar robustness is the sum of that column over `q = 1, …, N` divided by `N`.
 

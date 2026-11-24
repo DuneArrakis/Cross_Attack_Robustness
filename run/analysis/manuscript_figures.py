@@ -268,8 +268,35 @@ def write_rows(filename, rows):
                                    encoding='utf-8')
 
 
+def write_attack_ranks(matrices):
+    """Rank test attacks within each topology, before rounding scores for print."""
+    ranks = {key: matrix.rank(axis=1, method='min').astype(int)
+             for key, matrix in matrices.items()}
+    headings = [display_name(method) for method in METHODS]
+    rows = []
+    for i in range(0, len(SETTINGS), 2):
+        pair = SETTINGS[i:i + 2]
+        rows.append([r'\addlinespace[4pt]' if i else ''] +
+                    [r'\multicolumn{7}{c}{\textbf{%s}}' % name for name in NETWORKS[i:i + 2]])
+        rules = r'\cmidrule(lr){2-8}\cmidrule(lr){9-15}'
+        rows.append([rules + 'Design'] + headings + headings)
+        rows.append([r'\midrule Original $R$'] +
+                    ['%.4f' % value for key in pair for value in matrices[key].loc['Original']])
+        rows.append(['Original rank'] +
+                    [str(rank) for key in pair for rank in ranks[key].loc['Original']])
+        for method in METHODS:
+            label = (rules if method == METHODS[0] else '') + display_name(method)
+            row = [label]
+            for key in pair:
+                original = ranks[key].loc['Original']
+                for attack, rank in ranks[key].loc[method].items():
+                    row.append(r'\textbf{%d}' % rank if rank != original[attack] else str(rank))
+            rows.append(row)
+    write_rows('original_rows.tex', rows)
+
+
 def tables(formal, synthetic, empirical):
-    summary, timing, originals = {}, {}, {}
+    summary, timing, matrices = {}, {}, {}
     for key, folder in formal.items():
         scores = pd.read_csv(folder / 'defense_per_instance.csv').pivot(
             index='instance_id', columns='design', values='R')
@@ -296,7 +323,14 @@ def tables(formal, synthetic, empirical):
                     raise ValueError('Incomplete empirical constructions in ' + key)
                 scores[design] = block[METHODS].values.mean(axis=1).mean()
         summary[key] = scores.agg(['mean','std'])
-        originals[key] = originals_raw[METHODS].mean()
+        matrix = pd.read_csv(folder / 'R_mean.csv', index_col='design')
+        # The public matrices use the display name SRA for the archived Zheng protocol.
+        matrix = matrix.rename(index={'SRA': 'Zheng'}, columns={'SRA': 'Zheng'}).loc[DESIGNS, METHODS]
+        if not np.isfinite(matrix.values).all():
+            raise ValueError('Incomplete test-attack matrix in ' + key)
+        np.testing.assert_allclose(matrix.loc['Original'].values, originals_raw[METHODS].mean().values,
+                                   atol=1e-12, rtol=0)
+        matrices[key] = matrix
         times = pd.read_csv(folder / 'attack_runtime.csv')
         stages = times[times.stage.isin(['sa_initial', 'sa_candidate'])]
         if stages.groupby('stage').calls.nunique().max() != 1 or stages.failed_calls.sum():
@@ -318,5 +352,4 @@ def tables(formal, synthetic, empirical):
     write_rows('design_rows.tex', rows)
     write_rows('timing_rows.tex', [[name] + ['%.2f' % timing[key][m] for m in METHODS]
                                    for key, name in zip(SETTINGS, NETWORKS)])
-    write_rows('original_rows.tex', [[name] + [('%.4f' % originals[key][m]) for m in METHODS]
-                                     for key, name in zip(SETTINGS, NETWORKS)])
+    write_attack_ranks(matrices)
