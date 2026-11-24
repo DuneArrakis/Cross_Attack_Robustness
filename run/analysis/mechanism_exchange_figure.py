@@ -141,7 +141,7 @@ def make_figure(data, positions):
     for y, color, style, label in [(yb, '#727C84', '--', 'Before'), (ya, ADDED, '-', 'After')]:
         curve_ax.plot(x, y, color=color, ls=style, lw=1.25, marker='o', ms=2.5,
                       mfc='white', mew=.7, markevery=marks,
-                      label=label+r': $R=%.4f$'%(main['before_R'] if label=='Before' else main['after_R']))
+                      label=label+r': $R=%.3f$'%(main['before_R'] if label=='Before' else main['after_R']))
     curve_ax.vlines(q/n, yb[q], ya[q], color='#5A8848', lw=2.2, zorder=5)
     curve_ax.annotate('+%d nodes'%(main['after_LCC']-main['before_LCC']),
         xy=(q/n, (yb[q]+ya[q])/2), xytext=(min(q/n+.20, .65), .55), fontsize=8,
@@ -161,7 +161,7 @@ def make_figure(data, positions):
     bar_ax.set_ylim(len(METHODS)-.4, -.6)
     bar_ax.set_xlim(min(0, float(values.min()))-padding, max(0, float(values.max()))+padding)
     for i, v in enumerate(values):
-        bar_ax.text(v+(.025*span if v>=0 else -.025*span), i, '%+.4f'%v,
+        bar_ax.text(v+(.025*span if v>=0 else -.025*span), i, '%+.3f'%v,
                     va='center', ha='left' if v>=0 else 'right', fontsize=7.5)
     bar_ax.set_xlabel(r'$\Delta R=R_{\mathrm{after}}-R_{\mathrm{before}}$', fontsize=9, labelpad=2)
     bar_ax.grid(axis='x', ls='--', lw=.5, color='#D9D9D9', alpha=.8)

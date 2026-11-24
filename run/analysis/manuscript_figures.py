@@ -342,7 +342,7 @@ def tables(formal, synthetic, empirical):
         line = [(r'\midrule ' if design == 'onion' else '') + label]
         for key in SETTINGS:
             values = summary[key].loc['mean']
-            val = ('%.3f' if key in SETTINGS[:6] else '%.4f') % values[design]
+            val = '%.3f' % values[design]
             if values[design] == values.max():
                 val = r'\textbf{' + val + '}'
             line.append(val)
