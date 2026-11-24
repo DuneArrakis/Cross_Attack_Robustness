@@ -295,7 +295,7 @@ def main():
         return
     paper.ASSETS = out/'figures'
     paper.ASSETS.mkdir(parents=True, exist_ok=True)
-    style = dict(paper.STYLE, **{'font.size':9,'axes.labelsize':9,'xtick.labelsize':8,
+    style = dict(paper.STYLE, **{'font.serif':['STIXGeneral'], 'font.size':9,'axes.labelsize':9,'xtick.labelsize':8,
                                  'ytick.labelsize':8,'axes.linewidth':.7})
     with plt.rc_context(style):
         folders = {setting:collect(setting,out, args.replay_orders) for setting in paper.SETTINGS}

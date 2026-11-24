@@ -16,6 +16,8 @@ STYLE = {
     'xtick.direction': 'in', 'ytick.direction': 'in',
     'axes.unicode_minus': False,
 }
+# Table 1 order. Zheng is the archived method ID for SRA.
+METHODS = ['HDA', 'CI', 'EI', 'CoreHD', 'FINDER', 'DomiRank', 'Zheng']
 ROBUSTNESS_CMAP = LinearSegmentedColormap.from_list(
     'paper_robustness', ['#f3de67', '#a5c582', '#5a96cc', '#485098'])
 BLUE, GREEN = '#5a96cc', '#a5c582'

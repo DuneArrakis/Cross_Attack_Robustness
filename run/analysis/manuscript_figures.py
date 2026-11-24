@@ -10,11 +10,10 @@ import pandas as pd
 
 from ..config import PROJECT_ROOT
 from .mechanism_exchange_figure import load_data, make_figure
-from .paper_style import (STYLE, TOPOLOGY_STYLES, ROBUSTNESS_CMAP, METRICS, LABELS,
+from .paper_style import (METHODS, STYLE, TOPOLOGY_STYLES, ROBUSTNESS_CMAP, METRICS, LABELS,
                           display_name, topology_panels)
 
 
-METHODS = ['HDA', 'CI', 'CoreHD', 'EI', 'FINDER', 'Zheng', 'DomiRank']
 DESIGNS = ['Original'] + METHODS
 SETTINGS = ['BA_N100', 'BA_N300', 'BA_N500', 'BA_N1000', 'ER_N500', 'WS_N500',
             'USAir97', 'EUpower217']
@@ -46,6 +45,14 @@ CONSTRUCTION_STYLES = {'onion': ('#986431', None, '--'),
                        'backbone_rank_a3': ('#19785c', 's', '-.')}
 
 
+def legend_entries(ax, columns):
+    """Keep the manuscript order when the reader scans a legend row by row."""
+    handles, labels = ax.get_legend_handles_labels()
+    # Matplotlib fills each column before moving to the next one.
+    order = [i for col in range(columns) for i in range(col, len(labels), columns)]
+    return [handles[i] for i in order], [labels[i] for i in order]
+
+
 def curves(table, designs=DESIGNS, name='curves'):
     """Plot the first half of the removal sequence in the submitted curve style."""
     fig = plt.figure(figsize=(8.0, 4.08))
@@ -74,7 +81,8 @@ def curves(table, designs=DESIGNS, name='curves'):
         ax.set_title('Test: ' + display_name(attack), fontsize=9.5, pad=3)
         ax.set_title('(' + chr(97+i) + ')', loc='left', fontsize=8.6, weight='bold', pad=3)
         if i == 0:
-            legend = ax.legend(loc='upper right', ncol=2 if name == 'curves' else 1,
+            columns = 2 if name == 'curves' else 1
+            legend = ax.legend(*legend_entries(ax, columns), loc='upper right', ncol=columns,
                                fontsize=7.0 if name == 'curves' else 8, labelspacing=.08,
                                borderaxespad=.14, borderpad=.22, handlelength=1.15,
                                handletextpad=.3, columnspacing=.55, frameon=True,
@@ -143,8 +151,7 @@ def topology(table):
         ax.tick_params(labelsize=10)
         ax.xaxis.label.set_size(11)
         ax.yaxis.label.set_size(11)
-    handles, labels = axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center', ncol=4, frameon=False,
+    fig.legend(*legend_entries(axes[0], 4), loc='lower center', ncol=4, frameon=False,
                columnspacing=1.8, handlelength=2.1, fontsize=10, labelspacing=.3)
     fig.subplots_adjust(left=.077, right=.99, bottom=.35, top=.98, wspace=.39)
     save(fig, 'topology')
@@ -178,7 +185,7 @@ def feedback(folder):
     right.set_xticklabels([display_name(m) for m in METHODS], rotation=32, ha='right')
     tidy(left)
     tidy(right)
-    left.legend(loc='upper left', ncol=2, fontsize=7.4, frameon=False,
+    left.legend(*legend_entries(left, 2), loc='upper left', ncol=2, fontsize=7.4, frameon=False,
                 handlelength=1.4, columnspacing=.7, handletextpad=.4)
     right.legend(loc='upper left', frameon=False, fontsize=9, ncol=2,
                  handlelength=1.0, columnspacing=1.0)
@@ -223,7 +230,9 @@ def onion(formal_curves, synthetic, bundle):
     designs = bundle['designs'].tolist()
     instances = bundle['instances'].tolist()
     counts = bundle['lcc_counts']
-    if (designs != list(CONSTRUCTIONS) or bundle['attacks'].tolist() != METHODS
+    # The array follows the archive's labeled attack axis.
+    archive_methods = bundle['attacks'].tolist()
+    if (designs != list(CONSTRUCTIONS) or sorted(archive_methods) != sorted(METHODS)
             or len(set(instances)) != 50 or counts.shape != (2, 50, 7, 501)):
         raise ValueError('Incomplete BA500 construction curves')
     scores = synthetic[synthetic.family == 'BA_N500']
@@ -234,9 +243,9 @@ def onion(formal_curves, synthetic, bundle):
             raise ValueError('Unpaired BA500 construction curves')
         # R uses every removal step after q=0, including the unseen half of the curve.
         np.testing.assert_allclose(counts[di, :, :, 1:].mean(axis=2) / 500,
-                                   measured.loc[instances, METHODS].values, rtol=0, atol=1e-12)
+                                   measured.loc[instances, archive_methods].values, rtol=0, atol=1e-12)
         means = counts[di].mean(axis=0) / 500
-        for method, curve in zip(METHODS, means):
+        for method, curve in zip(archive_methods, means):
             rows.extend(dict(attack=method, design=design, x=q/500., lcc_fraction=curve[q])
                         for q in range(0, 501, 5))
     optimized = formal_curves[formal_curves.design.isin(['HDA', 'DomiRank'])]
@@ -296,7 +305,7 @@ def tables(formal, synthetic, empirical):
                 val = r'\textbf{' + val + '}'
             line.append(val)
         rows.append(line)
-        rows.append([''] + [r'{\scriptsize (%.3f)}' % summary[key].loc['std', design]
+        rows.append([''] + ['(%.3f)' % summary[key].loc['std', design]
                             for key in SETTINGS[:6]] + ['', ''])
     write_rows('design_rows.tex', rows)
     write_rows('timing_rows.tex', [[name] + ['%.2f' % timing[key][m] for m in METHODS]

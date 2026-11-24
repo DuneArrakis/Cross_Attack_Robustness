@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .paper_style import STYLE, TOPOLOGY_STYLES, display_name
+from .paper_style import METHODS, STYLE, TOPOLOGY_STYLES, display_name
 from .small_case_graphs import graph_from_mask, unpack_mask
 from ..attacks.common import lcc_curve_from_order
 
@@ -76,11 +76,12 @@ def make_figure(data, positions):
     import matplotlib.pyplot as plt
     from matplotlib.lines import Line2D
 
-    root, main, n, methods = data['root'], data['main'], data['n'], data['methods']
+    root, main, n = data['root'], data['main'], data['n']
+    archive_methods = data['methods']
     e = main['exchange']; q = main['q']; positions = np.asarray(positions, dtype=float)
     before, after = [graph_from_mask(int(e[k]), n) for k in ('before_mask', 'after_mask')]
     b, a = [data['index'][e[k]] for k in ('before_mask', 'after_mask')]
-    j = methods.index(e['method'])
+    j = archive_methods.index(e['method'])
     assert positions.shape == (n, 2) and np.isfinite(positions).all()
     assert before.degree() == after.degree()
     assert sorted(set(before.get_edgelist())-set(after.get_edgelist())) == [tuple(x) for x in e['removed_edges']]
@@ -91,9 +92,10 @@ def make_figure(data, positions):
         counts = np.rint(np.asarray(lcc_curve_from_order(graph, data['orders'][idx, j].tolist()))*n).astype(int)
         assert np.array_equal(counts, data['counts'][idx, j])
         assert abs(counts[1:].sum()/n**2-expected) < 1e-12
-    values = (data['counts'][a, :, 1:].astype(int).sum(axis=1)
-              - data['counts'][b, :, 1:].astype(int).sum(axis=1))/n**2
-    assert np.allclose(values, [main['native_delta_R'][m] for m in methods], rtol=0, atol=1e-12)
+    columns = [archive_methods.index(method) for method in METHODS]
+    values = (data['counts'][a, columns, 1:].astype(int).sum(axis=1)
+              - data['counts'][b, columns, 1:].astype(int).sum(axis=1))/n**2
+    assert np.allclose(values, [main['native_delta_R'][m] for m in METHODS], rtol=0, atol=1e-12)
     groups_b, groups_a = [_components(g, deleted) for g in (before, after)]
     assert len(groups_b[0]) == main['before_LCC'] and len(groups_a[0]) == main['after_LCC']
     colors_b = _component_colors(groups_b); colors_a = _component_colors(groups_a, colors_b)
@@ -151,12 +153,12 @@ def make_figure(data, positions):
                     handletextpad=.4, borderaxespad=.3, labelspacing=.3)
     curve_ax.grid(axis='y', ls='--', lw=.5, color='#D9D9D9', alpha=.8)
 
-    yy = np.arange(len(methods)); span = max(float(np.ptp(values)), .02)
+    yy = np.arange(len(METHODS)); span = max(float(np.ptp(values)), .02)
     padding = .42*span
-    bar_ax.barh(yy, values, color=[TOPOLOGY_STYLES[m][0] for m in methods], height=.58)
+    bar_ax.barh(yy, values, color=[TOPOLOGY_STYLES[m][0] for m in METHODS], height=.58)
     bar_ax.axvline(0, color='#35454F', lw=.75)
-    bar_ax.set_yticks(yy); bar_ax.set_yticklabels([display_name(m) for m in methods], fontsize=8)
-    bar_ax.set_ylim(len(methods)-.4, -.6)
+    bar_ax.set_yticks(yy); bar_ax.set_yticklabels([display_name(m) for m in METHODS], fontsize=8)
+    bar_ax.set_ylim(len(METHODS)-.4, -.6)
     bar_ax.set_xlim(min(0, float(values.min()))-padding, max(0, float(values.max()))+padding)
     for i, v in enumerate(values):
         bar_ax.text(v+(.025*span if v>=0 else -.025*span), i, '%+.4f'%v,
@@ -172,7 +174,7 @@ def make_figure(data, positions):
         labeled_nodes=[v+1 for v in sorted(focus)],
         removed_nodes=[v+1 for v in sorted(deleted)], q=q,
         before_R=main['before_R'], after_R=main['after_R'],
-        delta_R={m:float(v) for m,v in zip(methods, values)},
+        delta_R={m:float(v) for m,v in zip(METHODS, values)},
         residual_components_before=[[v+1 for v in g] for g in groups_b],
         residual_components_after=[[v+1 for v in g] for g in groups_a],
         panel_map=dict(a='before/after exchange', b='same removed-node set',
