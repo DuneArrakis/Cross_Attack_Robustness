@@ -1,0 +1,4 @@
+# Preserve the data bytes used by SHA256SUMS on all platforms.
+*.csv -text
+*.txt -text
+SHA256SUMS text eol=lf

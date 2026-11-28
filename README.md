@@ -2,6 +2,8 @@
 
 The study evaluates the original network and seven optimized designs under seven node-removal protocols. The [BA500 robustness matrix](results/R_mean.csv) contains the 56 cell means in Fig. 4(a), including FINDER. Each cell averages 50 independent input networks. HDA and DomiRank give seven-attack design means of 0.280439 and 0.290205 on BA500.
 
+For individual network scores, attack-rank changes, optimization times, BA500 candidate swaps and the electronic statistical tables, see the [detailed experimental data](results/detailed_data/README.md).
+
 ## Reproduce the paper
 
 From the repository root, use Linux x86-64 Docker. The image uses Python 3.7.12 and the [pinned CPU dependencies](environment/requirements-cpu.txt), compiles the FINDER extensions, and includes the trained checkpoint and data. The root-level requirements file records the historical GPU environment. Mount a directory to keep the generated results.

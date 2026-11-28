@@ -1,0 +1,3 @@
+state,left,right,n_instances,mean_difference,ci95_low,ci95_high,interval,status
+original,HDA,EI,20,0.13579975579975584,0.05916666666666669,0.2129029304029304,nominal_95_percent_paired_instance_bootstrap,ok
+original,HDA,DomiRank,20,-0.16629960317460313,-0.27708680555555554,-0.049282738095238164,nominal_95_percent_paired_instance_bootstrap,ok
